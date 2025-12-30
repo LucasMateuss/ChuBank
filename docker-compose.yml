@@ -1,0 +1,28 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: chu-bank-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password@123
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlvolume:/var/opt/mssql 
+
+  webapp:
+    image: chu-bank-api
+    container_name: chu-bank-api
+    build:
+      context: .
+      dockerfile: ChuBank.Api/Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChuBankDb;User Id=sa;Password=Password@123;TrustServerCertificate=True;
+      - ASPNETCORE_ENVIRONMENT=Development 
+    depends_on:
+      - sqlserver 
+
+volumes:
+  sqlvolume:
