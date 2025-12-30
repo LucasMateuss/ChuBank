@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using ChuBank.Application.DTOs;
 using ChuBank.Application.Interfaces;
+using ChuBank.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,10 +14,12 @@ namespace ChuBank.Api.Controllers;
 public class TransfersController : ControllerBase
 {
     private readonly ITransferService _transferService;
+    private readonly ILogger<AccountsController> _logger;
 
-    public TransfersController(ITransferService transferService)
+    public TransfersController(ITransferService transferService, ILogger<AccountsController> logger)
     {
         _transferService = transferService;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -28,17 +31,18 @@ public class TransfersController : ControllerBase
 
             return Ok(new { message = "Transferência realizada com sucesso." });
         }
-        catch (InvalidOperationException ex) 
+        catch (ChuBankException chuEx)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = chuEx.Message });
         }
-        catch (ArgumentException ex) 
+        catch (InvalidOperationException ex)
         {
             return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = "Erro interno ao processar transferência.", details = ex.Message });
+            _logger.LogError(ex, "Error: {Message}", ex.Message);
+            return StatusCode(500, new { error = "Não foi possível realizar a operação requisitada" });
         }
     }
 }

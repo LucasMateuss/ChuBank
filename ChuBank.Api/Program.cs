@@ -100,8 +100,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<ChuBank.Api.Middlewares.GlobalErrorHandlingMiddleware>();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

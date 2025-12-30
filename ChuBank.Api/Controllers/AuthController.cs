@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using ChuBank.Application.DTOs;
 using ChuBank.Application.Interfaces;
+using ChuBank.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChuBank.Api.Controllers;
@@ -11,10 +12,12 @@ namespace ChuBank.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAccountService _accountService;
+    private readonly ILogger<AccountsController> _logger;
 
-    public AuthController(IAccountService accountService)
+    public AuthController(IAccountService accountService, ILogger<AccountsController> logger)
     {
         _accountService = accountService;
+        _logger = logger;
     }
 
     [HttpPost("login")]
@@ -25,9 +28,14 @@ public class AuthController : ControllerBase
             var token = await _accountService.LoginAsync(dto);
             return Ok(new { token });
         }
-        catch (UnauthorizedAccessException)
+        catch (ChuBankException chuEx)
         {
-            return Unauthorized(new { message = "Conta ou senha inválidos." });
+            return BadRequest(new { error = chuEx.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error: {Message}", ex.Message);
+            return StatusCode(500, new { error = "Não foi possível realizar a operação requisitada" });
         }
     }
 }

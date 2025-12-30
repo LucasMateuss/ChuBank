@@ -57,7 +57,7 @@ A aplicação foi desenhada para rodar inteiramente via Docker, não sendo neces
 
   ```bash
 
-  git clone https://github.com/SEU-USUARIO/ChuBank.git
+  git clone https://github.com/LucasMateuss/ChuBank
 
   cd ChuBank
 
